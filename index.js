@@ -1,21 +1,16 @@
-console.log("Starting Map Finder application...");
-console.log("Please navigate to the map-finder directory and run 'npm start'");
-console.log("cd map-finder && npm start");
+console.log("Redirecting to Map Finder application...");
 
-// You can also try to start the application automatically
+// This script helps to redirect to the map-finder application
 const { exec } = require('child_process');
 const path = require('path');
 
 const mapFinderDir = path.join(__dirname, 'map-finder');
 
+// This will execute "npm start" in the map-finder directory
 exec('cd "' + mapFinderDir + '" && npm start', (error, stdout, stderr) => {
   if (error) {
     console.error(`Error: ${error.message}`);
     return;
   }
-  if (stderr) {
-    console.error(`stderr: ${stderr}`);
-    return;
-  }
-  console.log(`stdout: ${stdout}`);
+  console.log(`Map Finder application started successfully!`);
 }); 

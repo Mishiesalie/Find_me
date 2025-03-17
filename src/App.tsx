@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -62,12 +62,11 @@ const sampleInfrastructures: Infrastructure[] = [
 
 // Component to handle location finding
 function LocationMarker() {
-  const [position, setPosition] = useState<[number, number] | null>(null);
+  const [position, setPosition] = useState(null);
   const [locationFound, setLocationFound] = useState(false);
   const map = useMap();
-
   useEffect(() => {
-    map.locate().on("locationfound", function (e: L.LocationEvent) {
+    map.locate().on("locationfound", function (e) {
       setPosition([e.latlng.lat, e.latlng.lng]);
       map.flyTo(e.latlng, map.getZoom());
       setLocationFound(true);
@@ -81,29 +80,21 @@ function LocationMarker() {
   );
 }
 
-// Component to handle map events
-function MapEvents({ setMapCenter }: { setMapCenter: (center: [number, number]) => void }) {
+// Component to handle map center updates
+function MapCenterHandler({ center }: { center: [number, number] }) {
   const map = useMap();
   
   useEffect(() => {
-    map.on('moveend', () => {
-      const center = map.getCenter();
-      setMapCenter([center.lat, center.lng]);
-    });
-    
-    return () => {
-      map.off('moveend');
-    };
-  }, [map, setMapCenter]);
+    map.setView(center);
+  }, [center, map]);
   
   return null;
 }
-
 function App() {
-  const [infrastructures, setInfrastructures] = useState<Infrastructure[]>(sampleInfrastructures);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [selectedInfrastructure, setSelectedInfrastructure] = useState<Infrastructure | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([51.505, -0.09]); // London as default
+  const [infrastructures, setInfrastructures] = useState(sampleInfrastructures);
+  const [userLocation, setUserLocation] = useState(null);
+  const [selectedInfrastructure, setSelectedInfrastructure] = useState(null);
+  const [mapCenter, setMapCenter] = useState([51.505, -0.09]); // London as default
   const [mapZoom, setMapZoom] = useState(13);
 
   // Find user's location
@@ -158,6 +149,7 @@ function App() {
   return (
     <div className="map-container">
       <MapContainer 
+        key={`${mapCenter[0]}-${mapCenter[1]}-${mapZoom}`}
         center={mapCenter} 
         zoom={mapZoom} 
         style={{ height: '100vh', width: '100%' }}
@@ -167,8 +159,8 @@ function App() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Map Events Handler */}
-        <MapEvents setMapCenter={setMapCenter} />
+        {/* Map Center Handler */}
+        <MapCenterHandler center={mapCenter} />
         
         {/* User location marker */}
         {userLocation && (
